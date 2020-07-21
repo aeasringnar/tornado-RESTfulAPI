@@ -1,0 +1,57 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Tornado RESTfulAPI",
+    "version": "1.0.0",
+    "license": {
+      "name": "MIT"
+    }
+  },
+  "basePath": "/tornado",
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/public/test": {
+      "get": {
+        "summary": "\u6d4b\u8bd5\u63a5\u53e3",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ResFormat"
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ResFormat": {
+      "requied": [
+        "message",
+        "errorCode",
+        "data"
+      ],
+      "properties": {
+        "message": {
+          "type": "string",
+          "example": "OK"
+        },
+        "errorCode": {
+          "type": "integer",
+          "example": 0
+        },
+        "data": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,40 @@
+swagger: "2.0"
+info:
+  title: Tornado RESTfulAPI
+  version: 1.0.0
+  license:
+    name: MIT
+host: test.shedblood.cn
+basePath: /tornado
+schemes:
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /public/test:
+    get:
+      summary: 测试接口
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ResFormat'
+        default:
+          description: Unexpected error
+definitions:
+  ResFormat:
+    requied:
+      - message
+      - errorCode
+      - data
+    properties:
+      message:
+        type: string
+        example: OK
+      errorCode:
+        type: integer
+        example: 0
+      data:
+        type: object

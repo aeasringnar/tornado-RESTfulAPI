@@ -1,0 +1,10 @@
+version: "2"
+services:
+ tornado_app:
+  build: .
+  container_name: tornado-server
+  restart: always
+  ports:
+   - "8080:8080"
+  volumes:
+   - ./logs:/proj/logs
