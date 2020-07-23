@@ -16,6 +16,8 @@ from marshmallow import ValidationError
 from base.settings import async_db, sync_db, FILE_CHECK, FILE_SIZE, SERVER_NAME
 from .schemas import *
 from .models import *
+from celery_app.tasks import *
+from celery.result import AsyncResult
 
 
 class TestHandler(BaseHandler):
@@ -107,6 +109,45 @@ class GetMobielCodeHandler(BaseHandler):
             return self.finish(res_format)
         except ValidationError as err:
             return self.finish({"message": str(err.messages), "errorCode": 2, "data": {}})
+        except Exception as e:
+            print('出现异常：%s' % str(e))
+            return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
+
+
+class RunTaskHandler(BaseHandler):
+    '''
+    创建异步任务接口
+    post -> /public/runtask/
+    '''
+    async def post(self, *args, **kwargs):
+        res_format = {"message": "ok", "errorCode": 0, "data": {}}
+        try:
+            res = mul.delay(3,5)
+            res_format['data']['task_id'] = res.id
+            return self.finish(res_format)
+        except Exception as e:
+            print('出现异常：%s' % str(e))
+            return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
+
+
+class GetTaskResultHandler(BaseHandler):
+    '''
+    获取异步任务结果
+    get -> /public/getresult/
+    '''
+    async def get(self, *args, **kwargs):
+        res_format = {"message": "ok", "errorCode": 0, "data": {}}
+        try:
+            task_id = self.get_query_argument('task_id', None)
+            if not task_id:
+                res_format['errorCode'] = 2
+                res_format['message'] = '缺少任务唯一标识(get传参)：task_id'
+                return self.finish(res_format)
+            if AsyncResult(task_id).ready():
+                res_format['data']['result'] = AsyncResult(task_id).result
+            else:
+                res_format['message'] = '任务进行中'
+            return self.finish(res_format)
         except Exception as e:
             print('出现异常：%s' % str(e))
             return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})

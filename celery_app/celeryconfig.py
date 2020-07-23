@@ -33,11 +33,11 @@ worker_max_tasks_per_child = 100
 # 指定任务队列，使不同的任务在不同的队列中被执行 如果配置，在启动celery时需要增加 -Q add 多个示例 -Q add,mul
 # 示例：celery -A celery_app worker -Q add -l info -P eventlet(在Windows下启动worker，它将只消费add队列中的消息，也就是只执行add任务)
 # 示例：celery -A celery_app worker -Q add,mul -l info(在Linux下启动worker，它将只消费add和mul队列中的消息，也就是只执行add和mul任务)
-task_routes = {
-    'celery_app.tasks.add': {'queue': 'add'},
-    'celery_app.tasks.mul': {'queue': 'mul'},
-    'celery_app.tasks.xsum': {'queue': 'xsum'},
-    }
+# task_routes = {
+#     'celery_app.tasks.add': {'queue': 'add'},
+#     'celery_app.tasks.mul': {'queue': 'mul'},
+#     'celery_app.tasks.xsum': {'queue': 'xsum'},
+#     }
 # 指定任务的位置
 imports = (
     'celery_app.tasks',
