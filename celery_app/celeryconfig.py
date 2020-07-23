@@ -41,5 +41,6 @@ task_routes = {
 # 指定任务的位置
 imports = (
     'celery_app.tasks',
+    'apps.users.tasks',
 )
 # 后台运行worker示例：
