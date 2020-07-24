@@ -99,7 +99,8 @@ class GetMobielCodeHandler(BaseHandler):
             validataed = GetMobielCoseSchema().load(json.loads(data))
             code = create_code(abc=False)
             # 异步创建验证码缓存
-            redis_pool = await aioredis.create_redis_pool('redis://127.0.0.1/0')
+            # redis_pool = await aioredis.create_redis_pool('redis://127.0.0.1/0')
+            redis_pool = await self.application.redis
             value = await redis_pool.get(validataed.get('mobile'), encoding='utf-8')
             if value:
                 return self.finish({"message": "验证码已经发生，请勿重新发生", "errorCode": 2, "data": {}})
