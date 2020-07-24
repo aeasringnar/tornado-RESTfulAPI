@@ -18,6 +18,7 @@ from .schemas import *
 from .models import *
 from celery_app.tasks import *
 from celery.result import AsyncResult
+import asyncio
 
 
 class TestHandler(BaseHandler):
@@ -105,8 +106,9 @@ class GetMobielCodeHandler(BaseHandler):
             if value:
                 return self.finish({"message": "验证码已经发生，请勿重新发生", "errorCode": 2, "data": {}})
             await redis_pool.set(validataed.get('mobile'), code, expire=60 * 5)
-            redis_pool.close()
-            await redis_pool.wait_closed()
+            # redis_pool.close()
+            # await redis_pool.wait_closed()
+            # await asyncio.sleep(60 * 5)
             return self.finish(res_format)
         except ValidationError as err:
             return self.finish({"message": str(err.messages), "errorCode": 2, "data": {}})
