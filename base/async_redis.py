@@ -1,4 +1,5 @@
 import aioredis
+from base.settings import REDIS
 
 
 async def _init_with_loop(loop):
@@ -7,7 +8,7 @@ async def _init_with_loop(loop):
     :param loop: 事件循环
     :return: redis pool
     """
-    __pool = await aioredis.create_redis_pool('redis://localhost', minsize=1, maxsize=10000, encoding='utf8', loop=loop)
+    __pool = await aioredis.create_redis_pool(REDIS.get('default').get('LOCATION'), minsize=1, maxsize=10000, encoding='utf8', loop=loop)
     return __pool
 
 
