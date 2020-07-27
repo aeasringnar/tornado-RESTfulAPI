@@ -9,7 +9,7 @@ from base.settings import settings, async_db
 from utils.db_manage import run_create, run_update
 import signal
 from multiprocessing import cpu_count
-from base.async_redis import RedisPool
+from base.async_redis import redis_pool
 import asyncio
  
 def signal_handler(signal,frame):
@@ -49,7 +49,8 @@ update 修改表迁移""")
             async_db.set_allow_sync(False)
             app.objects = Manager(async_db)
             loop = asyncio.get_event_loop()
-            app.redis = RedisPool(loop=loop).get_conn()
+            # app.redis = RedisPool(loop=loop).get_conn()
+            app.redis = loop.run_until_complete(redis_pool(loop))
             print("""[%s]Wellcome...
 Starting development server at http://%s:%s/       
 Quit the server with CTRL+C.""" % (('debug' if settings['debug'] else 'line'), host, port))

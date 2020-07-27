@@ -1,5 +1,6 @@
 import aioredis
 from base.settings import REDIS
+import asyncio
 
 
 async def _init_with_loop(loop):
@@ -26,3 +27,7 @@ class RedisPool(object):
 
     def get_conn(self) -> aioredis.Redis:
         return self._redis
+
+
+async def redis_pool(loop):
+    return await aioredis.create_redis_pool('redis://localhost', minsize=1, maxsize=10000, encoding='utf8', loop=loop)
