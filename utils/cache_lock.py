@@ -2,8 +2,9 @@ import time
 import threading
 import redis
 import os, sys
-base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0,base_path)
+if __name__ == '__main__':
+    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    sys.path.insert(0,base_path)
 from base.settings import REDIS
 
 

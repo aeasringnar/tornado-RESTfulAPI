@@ -5,11 +5,10 @@ import os, sys
 from tornado import web
 from peewee_async import Manager
 from base.urls import urlpatterns
-from base.settings import settings, async_db
+from base.settings import settings, async_db, redis_pool
 from utils.db_manage import run_create, run_update
 import signal
 from multiprocessing import cpu_count
-from base.async_redis import redis_pool
 import asyncio
  
 def signal_handler(signal,frame):
