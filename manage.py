@@ -7,12 +7,13 @@ from peewee_async import Manager
 from base.urls import urlpatterns
 from base.settings import settings, async_db, redis_pool
 from utils.db_manage import run_create, run_update
+from utils.logger import logger
 import signal
 from multiprocessing import cpu_count
 import asyncio
  
 def signal_handler(signal,frame):
-    print('\n bye bye')
+    # print('\n bye bye')
     sys.exit()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -50,7 +51,7 @@ update 修改表迁移""")
             loop = asyncio.get_event_loop()
             # app.redis = RedisPool(loop=loop).get_conn()
             app.redis = loop.run_until_complete(redis_pool(loop))
-            print("""[%s]Wellcome...
+            logger.info("""[%s]Wellcome...
 Starting development server at http://%s:%s/       
 Quit the server with CTRL+C.""" % (('debug' if settings['debug'] else 'line'), host, port))
             server = HTTPServer(app)
@@ -66,5 +67,5 @@ runserver 运行服务，需要指定地址(选填)&端口。示例：runserver 
 migrate 生成表(迁移表)
 update 修改表迁移""")
     except Exception as e:
-        print('发生异常：%s' % str(e))
+        logger.error('发生异常：%s' % str(e))
         
