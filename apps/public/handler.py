@@ -12,6 +12,7 @@ import aioredis
 from base.handler import BaseHandler
 from utils.utils import create_code
 from utils.decorators import authenticated_async, auth_validated, validated_input_type
+from utils.logger import logger
 from marshmallow import ValidationError
 from base.settings import async_db, sync_db, FILE_CHECK, FILE_SIZE, SERVER_NAME
 from .schemas import *
@@ -32,7 +33,7 @@ class TestHandler(BaseHandler):
             res_format['message'] = 'Hello World'
             return self.finish(res_format)
         except Exception as e:
-            print('出现异常：%s' % str(e))
+            logger.error('出现异常：%s' % str(e))
             return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
 
 
@@ -83,7 +84,7 @@ class UploadFileHandler(BaseHandler):
         except ValidationError as err:
             return self.finish({"message": str(err.messages), "errorCode": 2, "data": {}})
         except Exception as e:
-            print('出现异常：%s' % str(e))
+            logger.error('出现异常：%s' % str(e))
             return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
 
 
@@ -113,7 +114,7 @@ class GetMobielCodeHandler(BaseHandler):
         except ValidationError as err:
             return self.finish({"message": str(err.messages), "errorCode": 2, "data": {}})
         except Exception as e:
-            print('出现异常：%s' % str(e))
+            logger.error('出现异常：%s' % str(e))
             return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
 
 
@@ -129,7 +130,7 @@ class RunTaskHandler(BaseHandler):
             res_format['data']['task_id'] = res.id
             return self.finish(res_format)
         except Exception as e:
-            print('出现异常：%s' % str(e))
+            logger.error('出现异常：%s' % str(e))
             return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
 
 
@@ -152,5 +153,5 @@ class GetTaskResultHandler(BaseHandler):
                 res_format['message'] = '任务进行中'
             return self.finish(res_format)
         except Exception as e:
-            print('出现异常：%s' % str(e))
+            logger.error('出现异常：%s' % str(e))
             return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
