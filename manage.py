@@ -11,7 +11,9 @@ from utils.logger import logger
 import signal
 from multiprocessing import cpu_count
 import asyncio
- 
+from cron_jobs import scheduler
+
+
 def signal_handler(signal,frame):
     # print('\n bye bye')
     sys.exit()
@@ -59,6 +61,8 @@ Quit the server with CTRL+C.""" % (('debug' if settings['debug'] else 'line'), h
             if not settings['debug']:
                 # 多进程 运行
                 server.start(cpu_count() - 1)
+            # 启动定时任务
+            scheduler.start()
             ioloop.IOLoop.current().start()
         else:
             print("""参数异常！

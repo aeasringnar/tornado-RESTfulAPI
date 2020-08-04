@@ -25,3 +25,4 @@ gevent==20.6.2
 eventlet==0.25.2
 aiohttp==3.6.2
 bcrypt==3.1.6
+apscheduler==3.6.3
