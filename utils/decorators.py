@@ -88,6 +88,6 @@ def validated_input_type(input_type = 'application/json'):
             except Exception as e:
                 self.set_status(200)
                 logger.error('出现异常：{}'.format(str(e)))
-                return self.finish({"message": "Token异常", "errorCode": 2, "data": {}})
+                return self.finish({"message": str(e), "errorCode": 2, "data": {}})
         return wrapper
     return decorator

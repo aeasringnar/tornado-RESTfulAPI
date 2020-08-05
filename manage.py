@@ -38,7 +38,7 @@ update 修改表迁移""")
             run_update()
         elif sys.argv[1] == 'runserver':
             if len(sys.argv) != 3:
-                raise ValueError('runserver选项参数错误！')
+                sys.argv.append('8080')
             if ':' in sys.argv[2]:
                 host, port = sys.argv[2].split(':')
             else:
@@ -62,7 +62,7 @@ Quit the server with CTRL+C.""" % (('debug' if settings['debug'] else 'line'), h
                 # 多进程 运行
                 server.start(cpu_count() - 1)
             # 启动定时任务
-            scheduler.start()
+            # scheduler.start()
             ioloop.IOLoop.current().start()
         else:
             print("""参数异常！

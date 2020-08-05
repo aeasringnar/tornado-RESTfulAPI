@@ -2,6 +2,7 @@ import json
 import uuid
 import os
 from datetime import datetime, timedelta
+import time
 import random
 import logging
 import aiofiles
@@ -18,6 +19,7 @@ from base.settings import async_db, sync_db
 from utils.logger import logger
 import copy
 from tornado.websocket import WebSocketHandler
+from utils.caches import cache_data
 
 
 class MobileLoginHandler(BaseHandler):
@@ -408,6 +410,7 @@ class AdminUserHandler(BaseHandler):
     @authenticated_async()
     @auth_validated
     @validated_input_type()
+    @cache_data()
     async def get(self, *args, **kwargs):
         res_format = {"message": "ok", "errorCode": 0, "data": {}}
         search_ls = ['auth_type']
@@ -429,7 +432,8 @@ class AdminUserHandler(BaseHandler):
                 total = await self.application.objects.count(User.select())
                 res_format['total'] = total
                 res_format['data'] = json.loads(ReturnUserSchema(many=True).dumps(objs))
-            return self.finish(res_format)
+            self.finish(res_format)
+            return res_format
         except Exception as e:
             logger.error('出现异常：%s' % str(e))
             return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
