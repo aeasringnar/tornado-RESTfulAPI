@@ -33,7 +33,7 @@ then
             echo 'dev'
             `cp ${current_dir}/config/dev_settings.py ${current_dir}/base/settings.py`
         fi
-        `nohup python3 -u manage.py runserver 0.0.0.0:${port} > ${current_dir}/logs/web.log 2>&1 &`
+        `nohup python3 manage.py runserver 0.0.0.0:${port} > /dev/null 2>&1 &`
         echo "web服务启动成功..."
     elif [ $1 == 'stop' ]
     then

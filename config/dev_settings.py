@@ -85,3 +85,5 @@ REDIS = {
         'LOCATION': 'redis://127.0.0.1/0'
     }
 }
+async def redis_pool(loop):
+    return await aioredis.create_redis_pool('redis://localhost', minsize=1, maxsize=10000, encoding='utf8', loop=loop)
