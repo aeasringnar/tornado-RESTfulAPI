@@ -35,6 +35,7 @@ def cache_data(need_auth = False, cache_time = 60*5):
             except Exception as e:
                 self.set_status(200)
                 logger.error('出现异常：{}'.format(str(e)))
-                return self.finish({"message": str(e), "errorCode": 2, "data": {}})
+                res = await func(self, *args, **kwargs)
+                return res
         return wrapper
     return decorator
