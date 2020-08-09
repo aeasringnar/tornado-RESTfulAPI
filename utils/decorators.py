@@ -59,7 +59,7 @@ def auth_validated(func):
                 return self.finish({"message": "非法用户，禁止访问。", "errorCode": 2, "data": {}})
             auth_name = '_'.join([item for item in self.request.path.split('/')[0:-1] if item != ''])
             query = AuthPermission.select().where(AuthPermission.auth_id == user.auth.id, AuthPermission.object_name == auth_name)
-            auth_obj = self.application.objects.execute(query)
+            auth_obj = await self.application.objects.execute(query)
             if not auth_obj:
                 return self.finish({"message": "无权限，禁止访问。", "errorCode": 2, "data": {}})
             if self.request.method == 'GET' and not auth_obj[0].auth_list:
