@@ -555,3 +555,10 @@ class EchoWebSocket(WebSocketHandler):
     def check_origin(self, origin):
         # 允许WebSocket的跨域请求
         return True
+
+
+from utils.crud import MixinHandler, ListHandler
+
+class CRUDhandleTest(ListHandler):
+    query_set = User
+    schema_class = ReturnUserSchema

@@ -10,3 +10,13 @@ urlpatterns = [
     url('/adminuser/?(?P<pk>\d*)', AdminUserHandler),
     url('/echo', EchoWebSocket),
 ]
+
+#################### test sample crud
+from utils.router import MyRouter
+from apps.users.handler import CRUDhandleTest
+
+router = MyRouter()
+router.register('/users/testcrud', CRUDhandleTest)
+
+
+urlpatterns += router.urlpath
