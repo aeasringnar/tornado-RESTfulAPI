@@ -10,6 +10,7 @@ import jwt
 from playhouse.shortcuts import model_to_dict
 import aioredis
 from base.handler import BaseHandler
+from base.response import RestResponseMsg
 from utils.utils import create_code
 from utils.decorators import authenticated_async, auth_validated, validated_input_type
 from utils.logger import logger
@@ -28,10 +29,11 @@ class TestHandler(BaseHandler):
     get -> /public/test/
     '''
     async def get(self, *args, **kwargs):
-        res_format = {"message": "ok", "errorCode": 0, "data": {}}
+        res = RestResponseMsg()
         try:
-            res_format['message'] = 'Hello World'
-            return self.finish(res_format)
+            res.update(message= 'Hello World')
+            self.finish(res.data)
+            return res.data
         except Exception as e:
             logger.error('出现异常：%s' % str(e))
             return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
@@ -45,7 +47,7 @@ class UploadFileHandler(BaseHandler):
     @authenticated_async()
     @validated_input_type(input_type = 'multipart/form-data')
     async def post(self, *args, **kwargs):
-        res_format = {"message": "ok", "errorCode": 0, "data": {}}
+        res = RestResponseMsg()
         try:
             # data = self.request.body.decode('utf-8') if self.request.body else "{}"
             # print(self.request.files.keys())
@@ -61,11 +63,9 @@ class UploadFileHandler(BaseHandler):
                 file_content = self.request.files.get(key)[0]['body']
                 check_name = file_name.split('.')[-1]
                 if check_name.lower() not in FILE_CHECK:
-                    res_format['message'] = file_name + '不是规定的文件类型(%s)！' % '/'.join(FILE_CHECK)
-                    res_format['errorCode'] = 2
+                    res.update(message = file_name + '不是规定的文件类型(%s)！' % '/'.join(FILE_CHECK), errorCode = 2)
                 if file_size > FILE_SIZE:
-                    res_format['message'] = file_name + '文件超过64mb，无法上传。'
-                    res_format['errorCode'] = 2
+                    res.update(messge = file_name + '文件超过64mb，无法上传。', errorCode = 2)
                 save_file_name = new_file_name + '.' + check_name
                 upfile_base_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'static/files/')
                 now_file_path = os.path.join(upfile_base_dir, str(datetime.now().date()))
@@ -79,13 +79,18 @@ class UploadFileHandler(BaseHandler):
                     u_file.write(file_content)
                 host_file_url = SERVER_NAME + '/files/' + save_file_name
                 upload_host_url_list.append(host_file_url)
-            res_format['data'] = upload_host_url_list if upload_host_url_list else {}
-            return self.finish(res_format)
+            res.update(data = upload_host_url_list if upload_host_url_list else {})
+            self.finish(res.data)
+            return res.data
         except ValidationError as err:
-            return self.finish({"message": str(err.messages), "errorCode": 2, "data": {}})
+            res.update(message = str(err.messages), errorCode = 2)
+            self.finish(res.data)
+            return res.data
         except Exception as e:
             logger.error('出现异常：%s' % str(e))
-            return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
+            res.update(message = "出现无法预料的异常：{}".format(str(e)), errorCode = 1)
+            self.finish(res.data)
+            return res.data
 
 
 class GetMobielCodeHandler(BaseHandler):
@@ -95,7 +100,7 @@ class GetMobielCodeHandler(BaseHandler):
     '''
     @validated_input_type()
     async def post(self, *args, **kwargs):
-        res_format = {"message": "ok", "errorCode": 0, "data": {}}
+        res = RestResponseMsg()
         try:
             data = self.request.body.decode('utf-8') if self.request.body else "{}"
             validataed = GetMobielCoseSchema().load(json.loads(data))
@@ -105,17 +110,24 @@ class GetMobielCodeHandler(BaseHandler):
             redis_pool = await self.application.redis
             value = await redis_pool.get(validataed.get('mobile'), encoding='utf-8')
             if value:
-                return self.finish({"message": "验证码已经发生，请勿重新发生", "errorCode": 2, "data": {}})
+                res.update(message = '验证码已经发生，请勿重新发生。', errorCode = 2)
+                self.finish(res.data)
+                return res.data
             await redis_pool.set(validataed.get('mobile'), code, expire=60 * 5)
             # redis_pool.close()
             # await redis_pool.wait_closed()
             # await asyncio.sleep(60 * 5)
-            return self.finish(res_format)
+            self.finish(res.data)
+            return res.data
         except ValidationError as err:
-            return self.finish({"message": str(err.messages), "errorCode": 2, "data": {}})
+            res.update(message = str(err.messages), errorCode = 2)
+            self.finish(res.data)
+            return res.data
         except Exception as e:
             logger.error('出现异常：%s' % str(e))
-            return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
+            res.update(message = "出现无法预料的异常：{}".format(str(e)), errorCode = 1)
+            self.finish(res.data)
+            return res.data
 
 
 class RunTaskHandler(BaseHandler):
@@ -124,14 +136,17 @@ class RunTaskHandler(BaseHandler):
     post -> /public/runtask/
     '''
     async def post(self, *args, **kwargs):
-        res_format = {"message": "ok", "errorCode": 0, "data": {}}
+        res = RestResponseMsg()
         try:
-            res = mul.delay(3,5)
-            res_format['data']['task_id'] = res.id
-            return self.finish(res_format)
+            task = mul.delay(3,5)
+            res.update(data = {'task_id': task.id})
+            self.finish(res.data)
+            return res.data
         except Exception as e:
             logger.error('出现异常：%s' % str(e))
-            return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
+            res.update(message = "出现无法预料的异常：{}".format(str(e)), errorCode = 1)
+            self.finish(res.data)
+            return res.data
 
 
 class GetTaskResultHandler(BaseHandler):
@@ -140,18 +155,21 @@ class GetTaskResultHandler(BaseHandler):
     get -> /public/getresult/
     '''
     async def get(self, *args, **kwargs):
-        res_format = {"message": "ok", "errorCode": 0, "data": {}}
+        res = RestResponseMsg()
         try:
             task_id = self.get_query_argument('task_id', None)
             if not task_id:
-                res_format['errorCode'] = 2
-                res_format['message'] = '缺少任务唯一标识(get传参)：task_id'
-                return self.finish(res_format)
+                res.update(message = '缺少任务唯一标识(get传参)：task_id', errorCode = 2)
+                self.finish(res.data)
+                return res.data
             if AsyncResult(task_id).ready():
-                res_format['data']['result'] = AsyncResult(task_id).result
+                res.update(data = {'result': AsyncResult(task_id).result})
             else:
-                res_format['message'] = '任务进行中'
-            return self.finish(res_format)
+                res.update(message = '任务进行中')
+            self.finish(res.data)
+            return res.data
         except Exception as e:
             logger.error('出现异常：%s' % str(e))
-            return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
+            res.update(message = "出现无法预料的异常：{}".format(str(e)), errorCode = 1)
+            self.finish(res.data)
+            return res.data
