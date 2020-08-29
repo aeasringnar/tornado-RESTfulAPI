@@ -9,6 +9,7 @@ import aiofiles
 import jwt
 from playhouse.shortcuts import model_to_dict
 from base.handler import BaseHandler
+from base.response import RestResponseMsg
 from apps.users.models import Group, Auth, AuthPermission, User
 from utils import utils
 from utils.decorators import authenticated_async, auth_validated, validated_input_type
@@ -557,7 +558,7 @@ class EchoWebSocket(WebSocketHandler):
         return True
 
 
-from utils.crud import MixinHandler, ListHandler
+from utils.crud import MixinHandler, ListHandler, RetrieveHandler
 
 class CRUDhandleTest(ListHandler):
     query_set = User

@@ -36,7 +36,9 @@ class TestHandler(BaseHandler):
             return res.data
         except Exception as e:
             logger.error('出现异常：%s' % str(e))
-            return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
+            res.update(message = "出现无法预料的异常：{}".format(str(e)), errorCode = 1)
+            self.finish(res.data)
+            return res.data
 
 
 class UploadFileHandler(BaseHandler):
