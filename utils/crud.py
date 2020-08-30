@@ -63,7 +63,37 @@ class RetrieveHandler(object):
 
 class CreateHandler(object):
     def post(self, *args, **kwargs):
-        print('发起创建操作')
+        @authenticated_async()
+        @auth_validated
+        @validated_input_type()
+        async def post(self, *args, **kwargs):
+            res_format = {"message": "ok", "errorCode": 0, "data": {}}
+            try:
+                # print()
+                data = self.request.body.decode('utf-8') if self.request.body else "{}"
+                # print(data)
+                # un_validata = NewUserSerializer.from_json(json.loads(data))
+                pk = kwargs.get('pk')
+                if pk:
+                    res_format['message'] = '不支持的方法，请检查路由是否正确。'
+                    res_format['errorCode'] = 2
+                    return self.finish(res_format)
+                validataed = AddUserSchema().load(json.loads(data))
+                # print(validataed, type(validataed))
+                username = validataed.get('username')
+                query = User.select().where(User.username==username)
+                checks = await self.application.objects.execute(query)
+                if checks:
+                    res_format['message'] = '该用户名已存在'
+                    res_format['errorCode'] = 2
+                    return self.finish(res_format)
+                await self.application.objects.create(User, **validataed)
+                return self.finish(res_format)
+            except ValidationError as err:
+                return self.finish({"message": str(err.messages), "errorCode": 2, "data": {}})
+            except Exception as e:
+                logger.error('出现异常：%s' % str(e))
+                return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
 
 
 class DeleteHandler(object):
