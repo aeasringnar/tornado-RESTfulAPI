@@ -5,12 +5,13 @@ from base.response import RestResponseMsg
 from base.pagination import Pagination
 from .logger import logger
 import json
+from peewee import SQL
 
 class MixinHandler(BaseHandler):
     query_set = None
     schema_class = None
-    search_fields = ('name', 'age')
-    filter_fields = ('group', 'status')
+    search_fields = ('username', 'gender')
+    filter_fields = ('group', 'is_freeze')
     order_by_fields = ('create_time', 'update_time')
     pagination_class = Pagination
     search_query_param = 'search'
@@ -32,7 +33,11 @@ class ListHandler(MixinHandler):
                 if len(auth) > 0:
                     self.res.update(data = json.loads(self.schema_class().dumps(auth[0])))
             else:
-                query = self.query_set.select().order_by(-self.query_set.id).paginate(page=self.page, paginate_by=self.page_size)
+                MY_SQL = ' and '.join('(%s)' % item for item in (self.search_sql, self.filter_sql) if item)
+                if MY_SQL:
+                    query = self.query_set.select().where(SQL(MY_SQL)).order_by(-self.query_set.id).paginate(page=self.page, paginate_by=self.page_size)
+                else:
+                    query = self.query_set.select().order_by(-self.query_set.id).paginate(page=self.page, paginate_by=self.page_size)
                 objs = await self.application.objects.execute(query)
                 total = await self.application.objects.count(self.query_set.select())
                 self.res.update(total = total, data = json.loads(self.schema_class(many=True).dumps(objs)))
@@ -49,13 +54,26 @@ class ListHandler(MixinHandler):
         self.page = eval(self.get_query_argument(self.pagination_class().page_query_param, '1'))
         self.page_size = eval(self.get_query_argument(self.pagination_class().page_size_query_param, str(self.pagination_class().page_size)))
         self.search_str = self.get_query_argument(self.search_query_param, '')
-        print('+' * 128)
-        print(self.search_str)
         self.order_str = self.get_query_argument(self.order_query_param, '')
         self.new_set = set(self.filter_fields)
         self.filter_keys = self.new_set.intersection(set(self.request.query_arguments.keys()))
         self.pk = kwargs.get('pk')
-
+        self.order_ls = self.order_str.split(',')
+        self.order_by_fields = tuple(['-%s' % item for item in self.order_by_fields] + list(self.order_by_fields))
+        self.order_keys = list(set(self.order_ls).intersection(set(self.order_by_fields)))
+        self.order_keys.sort(key = self.order_ls.index) # 保证多字段排序的顺序
+        # 模糊搜索的SQL
+        self.search_sql = ' or '.join(["{} like '%%{}%%'".format(item, self.search_str) for item in self.search_fields if self.search_str])
+        # 过滤的SQL
+        self.filter_sql = ' and '.join(["{} = '{}'".format(item, self.get_query_argument(item)) for item in self.filter_keys])
+        # 排序的SQL
+        self.order_sql = ' order by ' + ','.join(self.order_keys) if self.order_keys else ''
+        print('+' * 128)
+        print(self.search_sql)
+        print(self.filter_sql)
+        print(self.order_sql)
+        print(' and '.join('(%s)' % item for item in (self.search_sql, self.filter_sql) if item) + self.order_sql)
+        
 
 class RetrieveHandler(object):
     extend_path = True
