@@ -11,12 +11,12 @@ class MixinHandler(BaseHandler):
     query_set = None
     schema_class = None
     search_fields = ('username', 'gender')
-    filter_fields = ('group', 'is_freeze')
+    filter_fields = ('group_id', 'is_freeze')
     order_by_fields = ('create_time', 'update_time')
     pagination_class = Pagination
     search_query_param = 'search'
     order_query_param = 'order'
-    res = RestResponseMsg()
+    
 
 
 class ListHandler(MixinHandler):
@@ -50,6 +50,7 @@ class ListHandler(MixinHandler):
             return self.res.data
     
     def get_init(self, *args, **kwargs):
+        self.res = RestResponseMsg()
         self.request_data = self.request.body.decode('utf-8') if self.request.body else "{}"
         self.page = eval(self.get_query_argument(self.pagination_class().page_query_param, '1'))
         self.page_size = eval(self.get_query_argument(self.pagination_class().page_size_query_param, str(self.pagination_class().page_size)))
