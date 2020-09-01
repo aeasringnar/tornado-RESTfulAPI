@@ -34,10 +34,22 @@ class ListHandler(MixinHandler):
                     self.res.update(data = json.loads(self.schema_class().dumps(auth[0])))
             else:
                 MY_SQL = ' and '.join('(%s)' % item for item in (self.search_sql, self.filter_sql) if item)
+                MY_ORDER_SQL = []
+                for item in self.order_keys:
+                    print(item)
+                    if item[0] == '-':
+                        print(11111)
+                        MY_ORDER_SQL.append(-getattr(self.query_set, item[1:]))
+                    else:
+                        MY_ORDER_SQL.append(getattr(self.query_set, item))
+                if not MY_ORDER_SQL:
+                    MY_ORDER_SQL = [self.query_set.id]
+                print('+' * 128)
+                print(MY_ORDER_SQL)
                 if MY_SQL:
                     query = self.query_set.select().where(SQL(MY_SQL)).order_by(-self.query_set.id).paginate(page=self.page, paginate_by=self.page_size)
                 else:
-                    query = self.query_set.select().order_by(-self.query_set.id).paginate(page=self.page, paginate_by=self.page_size)
+                    query = self.query_set.select().order_by(*MY_ORDER_SQL).paginate(page=self.page, paginate_by=self.page_size)
                 objs = await self.application.objects.execute(query)
                 total = await self.application.objects.count(self.query_set.select())
                 self.res.update(total = total, data = json.loads(self.schema_class(many=True).dumps(objs)))
