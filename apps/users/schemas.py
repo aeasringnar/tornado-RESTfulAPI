@@ -213,3 +213,61 @@ class AddAuthSchema(BaseSchema):
 class UpdateAuthSchema(BaseSchema):
     auth_type = fields.String(label= "权限名称")
     auth_permissions = fields.List(fields.Nested(AddAuthPermissionSchema()), required=True, error_messages={"required": "至少输入一个功能权限明细。"})
+
+
+############################ crud use schema
+from utils.crudSchema import CrudBaseSchema
+
+
+class CrudUseAddUserSchema(CrudBaseSchema):
+    username = fields.String(label='用户名', required=True, validate=validate.Length(min=3,max=32, error='用户名长度必须在3到32个字符。'), error_messages={"required": "用户名为必传项。"})
+    password = fields.String(label='密码', required=True, validate=validate.Length(min=3,max=32, error='密码长度必须在3到32个字符。'), error_messages={"required": "密码为必传项。"})
+    mobile = fields.String(label='手机号或电话', required=True, error_messages={"required": "手机号或电话为必传项。"})
+    email = fields.String(label='邮箱', validate=validate.Email(error='输入的邮箱格式不正确。'))
+    real_name = fields.String(label='真实姓名', validate=validate.Length(min=1,max=32, error='真实姓名长度必须在1到32个字符。'))
+    nick_name = fields.String(label='昵称', validate=validate.Length(min=3,max=32, error='昵称长度必须在3到32个字符。'))
+    region = fields.String(label='区域')
+    avatar_url = fields.String(label='头像地址')
+    gender = fields.Integer(label='性别')
+    birth_date = fields.Date(label='出生日期', format="%Y-%m-%d")
+    group_id = fields.Integer(label='用户组', required=True, error_messages={"required": "用户组为必传项。"})
+    auth_id = fields.Integer(label='权限', error_messages={'invalid': '权限id必须为整数类型'})
+
+    @validates('mobile')
+    def validate_mobile(self, data):
+        if len(data) not in [11, 12]:
+            raise ValidationError("手机号或电话格式不正确。")
+    
+    @validates('auth_id') # 时间上这里验证都是延后与字段本身属性的验证，例如auth_id会对传入的数据进行数字验证，该验证早于validates
+    def validate_auth(self, data):
+        if not data:
+            raise ValidationError("权限id不允许为空字符串。")
+        if not isinstance(data, int):
+            raise ValidationError("权限id必须为整数。")
+
+    @pre_load
+    def process_input(self, data, **kwargs):
+        '''设置在验证数据之后将邮箱字段的值全部转小写，并去除前后空格。'''
+        if data.get('email'):
+            data['email'] = data.get('email').lower().strip()
+        # if data.get('auth_id') and not isinstance(data.get('auth_id'), int): # 这里 可以做部分验证，实在找不到好的验证方法时
+        #     raise ValidationError("权限id必须为整数。")
+        return data
+
+
+class CrudUseReturnUserSchema(CrudBaseSchema):
+    id = fields.Int(dump_only=True)
+    username = fields.String(label='用户名', dump_only=True)
+    # password = fields.String(label='密码', dump_only=True)
+    mobile = fields.String(label='手机号或电话', dump_only=True)
+    email = fields.String(label='邮箱', dump_only=True)
+    real_name = fields.String(label='真实姓名', dump_only=True)
+    nick_name = fields.String(label='昵称', dump_only=True)
+    region = fields.String(label='区域', dump_only=True)
+    # avatar_url = fields.String(label='头像地址', dump_only=True)
+    avatar_url = fields.String(label='头像地址', dump_only=True)
+    gender = fields.Integer(label='性别', dump_only=True)
+    birth_date = fields.Date(label='出生日期', format="%Y-%m-%d", dump_only=True)
+    # group_id = fields.Integer(label='用户组', dump_only=True)
+    group = fields.Nested(UserUseGroupSchema(exclude=("update_time", "create_time")), dump_only=True)
+    auth_id = fields.Integer(label='权限', dump_only=True)

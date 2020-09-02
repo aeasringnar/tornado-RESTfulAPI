@@ -559,7 +559,8 @@ class EchoWebSocket(WebSocketHandler):
 
 
 from utils.crud import MixinHandler, ListHandler, RetrieveHandler
+from .schemas import CrudUseAddUserSchema, CrudUseReturnUserSchema
 
 class CRUDhandleTest(ListHandler):
     query_set = User
-    schema_class = ReturnUserSchema
+    schema_class = CrudUseReturnUserSchema
