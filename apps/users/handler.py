@@ -562,5 +562,11 @@ from utils.crud import MixinHandler, ListHandler, RetrieveHandler
 from .schemas import CrudUseAddUserSchema, CrudUseReturnUserSchema
 
 class CRUDhandleTest(ListHandler):
-    query_set = User
-    schema_class = CrudUseReturnUserSchema
+    query_model = User
+    # schema_class = CrudUseReturnUserSchema
+
+    @property
+    def get_schema_class(self):
+        print('-' * 128)
+        print(self.request.method)
+        return CrudUseReturnUserSchema

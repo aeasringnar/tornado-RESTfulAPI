@@ -8,7 +8,7 @@ import json
 from peewee import SQL
 
 class MixinHandler(BaseHandler):
-    query_set = None
+    query_model = None
     schema_class = None
     search_fields = ('username', 'gender')
     filter_fields = ('group_id', 'is_freeze')
@@ -16,7 +16,14 @@ class MixinHandler(BaseHandler):
     pagination_class = Pagination
     search_query_param = 'search'
     order_query_param = 'order'
-    
+
+    def get_query_model(self):
+        return self.query_model
+
+    @property
+    def get_schema_class(self):
+        return self.schema_class
+
 
 
 class ListHandler(MixinHandler):
@@ -28,10 +35,10 @@ class ListHandler(MixinHandler):
         self.get_init(*args, **kwargs)
         try:
             if self.pk:
-                query = self.query_set.select().where(self.query_set.id==int(self.pk))
+                query = self.get_query_model().select().where(self.get_query_model().id==int(self.pk))
                 auth = await self.application.objects.execute(query)
                 if len(auth) > 0:
-                    self.res.update(data = json.loads(self.schema_class().dumps(auth[0])))
+                    self.res.update(data = json.loads(self.get_schema_class().dumps(auth[0])))
             else:
                 MY_SQL = ' and '.join('(%s)' % item for item in (self.search_sql, self.filter_sql) if item)
                 MY_ORDER_SQL = []
@@ -39,20 +46,20 @@ class ListHandler(MixinHandler):
                     print(item)
                     if item[0] == '-':
                         print(11111)
-                        MY_ORDER_SQL.append(-getattr(self.query_set, item[1:]))
+                        MY_ORDER_SQL.append(-getattr(self.get_query_model(), item[1:]))
                     else:
-                        MY_ORDER_SQL.append(getattr(self.query_set, item))
+                        MY_ORDER_SQL.append(getattr(self.get_query_model(), item))
                 if not MY_ORDER_SQL:
-                    MY_ORDER_SQL = [self.query_set.id]
+                    MY_ORDER_SQL = [self.get_query_model().id]
                 print('+' * 128)
                 print(MY_ORDER_SQL)
                 if MY_SQL:
-                    query = self.query_set.select().where(SQL(MY_SQL)).order_by(-self.query_set.id).paginate(page=self.page, paginate_by=self.page_size)
+                    query = self.get_query_model().select().where(SQL(MY_SQL)).order_by(-self.get_query_model().id).paginate(page=self.page, paginate_by=self.page_size)
                 else:
-                    query = self.query_set.select().order_by(*MY_ORDER_SQL).paginate(page=self.page, paginate_by=self.page_size)
+                    query = self.get_query_model().select().order_by(*MY_ORDER_SQL).paginate(page=self.page, paginate_by=self.page_size)
                 objs = await self.application.objects.execute(query)
-                total = await self.application.objects.count(self.query_set.select())
-                self.res.update(total = total, data = json.loads(self.schema_class(many=True).dumps(objs)))
+                total = await self.application.objects.count(self.get_query_model().select())
+                self.res.update(total = total, data = json.loads(self.get_schema_class(many=True).dumps(objs)))
             self.finish(self.res.data)
             return self.res.data
         except Exception as e:
