@@ -6,6 +6,7 @@ from base.pagination import Pagination
 from .logger import logger
 import json
 from peewee import SQL
+from marshmallow import ValidationError
 
 class MixinHandler(BaseHandler):
     query_model = None
@@ -43,16 +44,12 @@ class ListHandler(MixinHandler):
                 MY_SQL = ' and '.join('(%s)' % item for item in (self.search_sql, self.filter_sql) if item)
                 MY_ORDER_SQL = []
                 for item in self.order_keys:
-                    print(item)
                     if item[0] == '-':
-                        print(11111)
                         MY_ORDER_SQL.append(-getattr(self.get_query_model(), item[1:]))
                     else:
                         MY_ORDER_SQL.append(getattr(self.get_query_model(), item))
                 if not MY_ORDER_SQL:
                     MY_ORDER_SQL = [self.get_query_model().id]
-                print('+' * 128)
-                print(MY_ORDER_SQL)
                 if MY_SQL:
                     query = self.get_query_model().select().where(SQL(MY_SQL)).order_by(-self.get_query_model().id).paginate(page=self.page, paginate_by=self.page_size)
                 else:
@@ -86,52 +83,49 @@ class ListHandler(MixinHandler):
         self.search_sql = ' or '.join(["{} like '%%{}%%'".format(item, self.search_str) for item in self.search_fields if self.search_str])
         # 过滤的SQL
         self.filter_sql = ' and '.join(["{} = '{}'".format(item, self.get_query_argument(item)) for item in self.filter_keys])
-        # 排序的SQL
-        self.order_sql = ' order by ' + ','.join(self.order_keys) if self.order_keys else ''
         print('+' * 128)
         print(self.search_sql)
         print(self.filter_sql)
-        print(self.order_sql)
-        print(' and '.join('(%s)' % item for item in (self.search_sql, self.filter_sql) if item) + self.order_sql)
+        print(' and '.join('(%s)' % item for item in (self.search_sql, self.filter_sql) if item))
         
 
 class RetrieveHandler(object):
     extend_path = True
 
 
-class CreateHandler(object):
-    def post(self, *args, **kwargs):
-        @authenticated_async()
-        @authvalidated_async
-        @validated_input_type()
-        async def post(self, *args, **kwargs):
-            res_format = {"message": "ok", "errorCode": 0, "data": {}}
-            try:
-                # print()
-                data = self.request.body.decode('utf-8') if self.request.body else "{}"
-                # print(data)
-                # un_validata = NewUserSerializer.from_json(json.loads(data))
-                pk = kwargs.get('pk')
-                if pk:
-                    res_format['message'] = '不支持的方法，请检查路由是否正确。'
-                    res_format['errorCode'] = 2
-                    return self.finish(res_format)
-                validataed = AddUserSchema().load(json.loads(data))
-                # print(validataed, type(validataed))
-                username = validataed.get('username')
-                query = User.select().where(User.username==username)
-                checks = await self.application.objects.execute(query)
-                if checks:
-                    res_format['message'] = '该用户名已存在'
-                    res_format['errorCode'] = 2
-                    return self.finish(res_format)
-                await self.application.objects.create(User, **validataed)
-                return self.finish(res_format)
-            except ValidationError as err:
-                return self.finish({"message": str(err.messages), "errorCode": 2, "data": {}})
-            except Exception as e:
-                logger.error('出现异常：%s' % str(e))
-                return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
+class CreateHandler(MixinHandler):
+    # @authenticated_async()
+    # @authvalidated_async()
+    # @validated_input_type()
+    async def post(self, *args, **kwargs):
+        res_format = {"message": "ok", "errorCode": 0, "data": {}}
+        self.res = RestResponseMsg()
+        self.request_data = self.request.body.decode('utf-8') if self.request.body else "{}"
+        try:
+            pk = kwargs.get('pk')
+            if pk:
+                self.res.update(message = '不支持的方法，请检查路由是否正确。', errorCode = 2)
+                self.finish(self.res.data)
+                return self.res.data
+            validataed = self.get_schema_class().load(json.loads(self.request_data))
+            # username = validataed.get('username')
+            # query = self.get_query_model().select().where(self.get_query_model().username==username)
+            # checks = await self.application.objects.execute(query)
+            # if checks:
+            #     res_format['message'] = '该用户名已存在'
+            #     res_format['errorCode'] = 2
+            #     return self.finish(res_format)
+            await self.application.objects.create(self.get_query_model(), **validataed)
+            return self.finish(res_format)
+        except ValidationError as err:
+            self.res.update(message = str(err.messages), errorCode = 2)
+            self.finish(self.res.data)
+            return self.res.data
+        except Exception as e:
+            logger.error('出现异常：%s' % str(e))
+            self.res.update(message = "出现无法预料的异常：{}".format(str(e)), errorCode = 1)
+            self.finish(self.res.data)
+            return self.res.data
 
 
 class DeleteHandler(object):

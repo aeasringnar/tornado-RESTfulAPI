@@ -71,7 +71,7 @@ class AuthPermission(BaseModel):
 
 class User(BaseModel):
     # 管理员时使用账户密码登录
-    username = CharField(max_length=32, default='', verbose_name='用户账号')
+    username = CharField(max_length=32, default='', unique = False, verbose_name='用户账号')
     # password = CharField(max_length=255, default='',verbose_name='用户密码')
     password = PasswordField(default='123456', verbose_name="密码")
     mobile = CharField(max_length=12, default='', verbose_name='用户手机号')
