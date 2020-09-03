@@ -1,4 +1,4 @@
-from .decorators import auth_validated, authenticated_async, validated_input_type
+from .decorators import authvalidated_async, authenticated_async, validated_input_type
 from .caches import cache_data
 from base.handler import BaseHandler
 from base.response import RestResponseMsg
@@ -28,7 +28,7 @@ class MixinHandler(BaseHandler):
 
 class ListHandler(MixinHandler):
     # @authenticated_async()
-    # @auth_validated
+    # @authvalidated_async()
     # @validated_input_type()
     # @cache_data()
     async def get(self, *args, **kwargs):
@@ -102,7 +102,7 @@ class RetrieveHandler(object):
 class CreateHandler(object):
     def post(self, *args, **kwargs):
         @authenticated_async()
-        @auth_validated
+        @authvalidated_async
         @validated_input_type()
         async def post(self, *args, **kwargs):
             res_format = {"message": "ok", "errorCode": 0, "data": {}}

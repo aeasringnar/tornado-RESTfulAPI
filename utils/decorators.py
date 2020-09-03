@@ -4,7 +4,7 @@ from apps.users.models import User, Auth, AuthPermission
 from .logger import logger
 
 
-def authenticated_async(verify_is_admin=False):
+def authenticated_async(is_super=False):
     ''''
     JWT认证装饰器
     '''
@@ -47,31 +47,33 @@ def authenticated_async(verify_is_admin=False):
     return decorator
 
 
-def auth_validated(func):
+def authvalidated_async(is_super=False):
     '''
     动态权限装饰器：根据用户的权限auth来判断对应的路由是否有权限：查看、新增、修改、删除
     '''
-    @wraps(func)
-    async def wrapper(self, *args, **kwargs):
-        user = self._current_user
-        if user.group.group_type != 'SuperAdmin':
-            if not user.auth:
-                return self.finish({"message": "非法用户，禁止访问。", "errorCode": 2, "data": {}})
-            auth_name = '_'.join([item for item in self.request.path.split('/')[0:-1] if item != ''])
-            query = AuthPermission.select().where(AuthPermission.auth_id == user.auth.id, AuthPermission.object_name == auth_name)
-            auth_obj = await self.application.objects.execute(query)
-            if not auth_obj:
-                return self.finish({"message": "无权限，禁止访问。", "errorCode": 2, "data": {}})
-            if self.request.method == 'GET' and not auth_obj[0].auth_list:
-                return self.finish({"message": "无查看权限，禁止访问。", "errorCode": 2, "data": {}})
-            if self.request.method == 'POST' and not auth_obj[0].auth_create:
-                return self.finish({"message": "无新增权限，禁止访问。", "errorCode": 2, "data": {}})
-            if self.request.method == 'PATCH' and not auth_obj[0].auth_update:
-                return self.finish({"message": "无修改权限，禁止访问。", "errorCode": 2, "data": {}})
-            if self.request.method == 'DELETE' and not auth_obj[0].auth_destroy:
-                return self.finish({"message": "无删除权限，禁止访问。", "errorCode": 2, "data": {}})
-        await func(self, *args, **kwargs)
-    return wrapper
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(self, *args, **kwargs):
+            user = self._current_user
+            if user.group.group_type != 'SuperAdmin':
+                if not user.auth:
+                    return self.finish({"message": "非法用户，禁止访问。", "errorCode": 2, "data": {}})
+                auth_name = '_'.join([item for item in self.request.path.split('/')[0:-1] if item != ''])
+                query = AuthPermission.select().where(AuthPermission.auth_id == user.auth.id, AuthPermission.object_name == auth_name)
+                auth_obj = await self.application.objects.execute(query)
+                if not auth_obj:
+                    return self.finish({"message": "无权限，禁止访问。", "errorCode": 2, "data": {}})
+                if self.request.method == 'GET' and not auth_obj[0].auth_list:
+                    return self.finish({"message": "无查看权限，禁止访问。", "errorCode": 2, "data": {}})
+                if self.request.method == 'POST' and not auth_obj[0].auth_create:
+                    return self.finish({"message": "无新增权限，禁止访问。", "errorCode": 2, "data": {}})
+                if self.request.method == 'PATCH' and not auth_obj[0].auth_update:
+                    return self.finish({"message": "无修改权限，禁止访问。", "errorCode": 2, "data": {}})
+                if self.request.method == 'DELETE' and not auth_obj[0].auth_destroy:
+                    return self.finish({"message": "无删除权限，禁止访问。", "errorCode": 2, "data": {}})
+            await func(self, *args, **kwargs)
+        return wrapper
+    return decorator
 
 
 def validated_input_type(input_type = 'application/json'):

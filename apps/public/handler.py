@@ -12,7 +12,7 @@ import aioredis
 from base.handler import BaseHandler
 from base.response import RestResponseMsg
 from utils.utils import create_code
-from utils.decorators import authenticated_async, auth_validated, validated_input_type
+from utils.decorators import authenticated_async, authvalidated_async, validated_input_type
 from utils.logger import logger
 from marshmallow import ValidationError
 from base.settings import async_db, sync_db, FILE_CHECK, FILE_SIZE, SERVER_NAME

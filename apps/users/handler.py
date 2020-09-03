@@ -12,7 +12,7 @@ from base.handler import BaseHandler
 from base.response import RestResponseMsg
 from apps.users.models import Group, Auth, AuthPermission, User
 from utils import utils
-from utils.decorators import authenticated_async, auth_validated, validated_input_type
+from utils.decorators import authenticated_async, authvalidated_async, validated_input_type
 from .schemas import AuthSerializer, AuthPermissionSerializer, NewUserSerializer, AddUserSchema, ReturnUserSchema, UpdateUserSchema, MobielLoginSchema, AdminLoginSchema, AddAuthSchema, UpdateAuthSchema, \
     ChangeUserSchema
 from marshmallow import ValidationError
@@ -226,7 +226,7 @@ class AuthHandler(BaseHandler):
         }
     '''
     @authenticated_async()
-    @auth_validated
+    @authvalidated_async()
     @validated_input_type()
     async def get(self, *args, **kwargs):
         res_format = {"message": "ok", "errorCode": 0, "data": {}}
@@ -269,7 +269,7 @@ class AuthHandler(BaseHandler):
             return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
 
     @authenticated_async()
-    @auth_validated
+    @authvalidated_async()
     @validated_input_type()
     async def patch(self, *args, **kwargs):
         res_format = {"message": "ok", "errorCode": 0, "data": {}}
@@ -316,7 +316,7 @@ class AuthHandler(BaseHandler):
             return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
 
     @authenticated_async()
-    @auth_validated
+    @authvalidated_async()
     @validated_input_type()
     async def post(self, *args, **kwargs):
         res_format = {"message": "ok", "errorCode": 0, "data": {}}
@@ -356,7 +356,7 @@ class AuthHandler(BaseHandler):
             return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
 
     @authenticated_async()
-    @auth_validated
+    @authvalidated_async()
     @validated_input_type()
     async def delete(self, *args, **kwargs):
         res_format = {"message": "ok", "errorCode": 0, "data": {}}
@@ -409,7 +409,7 @@ class AdminUserHandler(BaseHandler):
         }
     '''
     @authenticated_async()
-    @auth_validated
+    @authvalidated_async()
     @validated_input_type()
     @cache_data()
     async def get(self, *args, **kwargs):
@@ -440,7 +440,7 @@ class AdminUserHandler(BaseHandler):
             return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
 
     @authenticated_async()
-    @auth_validated
+    @authvalidated_async()
     @validated_input_type()
     async def patch(self, *args, **kwargs):
         res_format = {"message": "ok", "errorCode": 0, "data": {}}
@@ -482,7 +482,7 @@ class AdminUserHandler(BaseHandler):
             return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
 
     @authenticated_async()
-    @auth_validated
+    @authvalidated_async()
     @validated_input_type()
     async def post(self, *args, **kwargs):
         res_format = {"message": "ok", "errorCode": 0, "data": {}}
@@ -514,7 +514,7 @@ class AdminUserHandler(BaseHandler):
             return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
 
     @authenticated_async()
-    @auth_validated
+    @authvalidated_async()
     @validated_input_type()
     async def delete(self, *args, **kwargs):
         res_format = {"message": "ok", "errorCode": 0, "data": {}}
