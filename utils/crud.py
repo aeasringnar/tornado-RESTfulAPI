@@ -83,10 +83,10 @@ class ListHandler(MixinHandler):
         self.search_sql = ' or '.join(["{} like '%%{}%%'".format(item, self.search_str) for item in self.search_fields if self.search_str])
         # 过滤的SQL
         self.filter_sql = ' and '.join(["{} = '{}'".format(item, self.get_query_argument(item)) for item in self.filter_keys])
-        print('+' * 128)
-        print(self.search_sql)
-        print(self.filter_sql)
-        print(' and '.join('(%s)' % item for item in (self.search_sql, self.filter_sql) if item))
+        # print('+' * 128)
+        # print(self.search_sql)
+        # print(self.filter_sql)
+        # print(' and '.join('(%s)' % item for item in (self.search_sql, self.filter_sql) if item))
         
 
 class RetrieveHandler(object):
@@ -108,13 +108,6 @@ class CreateHandler(MixinHandler):
                 self.finish(self.res.data)
                 return self.res.data
             validataed = self.get_schema_class().load(json.loads(self.request_data))
-            # username = validataed.get('username')
-            # query = self.get_query_model().select().where(self.get_query_model().username==username)
-            # checks = await self.application.objects.execute(query)
-            # if checks:
-            #     res_format['message'] = '该用户名已存在'
-            #     res_format['errorCode'] = 2
-            #     return self.finish(res_format)
             await self.application.objects.create(self.get_query_model(), **validataed)
             return self.finish(res_format)
         except ValidationError as err:
@@ -128,15 +121,72 @@ class CreateHandler(MixinHandler):
             return self.res.data
 
 
-class DeleteHandler(object):
+class DeleteHandler(MixinHandler):
     extend_path = True
-    def delete(self, *args, **kwargs):
-        print('发起删除操作')
+    # @authenticated_async()
+    # @authvalidated_async()
+    # @validated_input_type()
+    async def delete(self, *args, **kwargs):
+        self.res = RestResponseMsg()
+        try:
+            pk = kwargs.get('pk')
+            if not pk:
+                self.res.update(message = '路由异常，请携带id。', errorCode = 2)
+                self.finish(self.res.data)
+                return self.res.data
+            query = self.get_query_model().select(self.get_query_model().id).where(self.get_query_model().id == int(pk))
+            check_obj = await self.application.objects.execute(query)
+            if not check_obj:
+                self.res.update(message = '资源不存在。', errorCode = 2)
+                self.finish(self.res.data)
+                return self.res.data
+            await self.application.objects.delete(check_obj[0])
+            self.finish(self.res.data)
+            return self.res.data
+        except Exception as e:
+            logger.error('出现异常：%s' % str(e))
+            self.res.update(message = "出现无法预料的异常：{}".format(str(e)), errorCode = 1)
+            self.finish(self.res.data)
+            return self.res.data
 
 
-class PatchHandler(object):
-    def patch(self, *args, **kwargs):
-        print('发起局部修改操作')
+class PatchHandler(MixinHandler):
+    # @authenticated_async()
+    # @authvalidated_async()
+    # @validated_input_type()
+    async def patch(self, *args, **kwargs):
+        self.res = RestResponseMsg()
+        self.request_data = self.request.body.decode('utf-8') if self.request.body else "{}"
+        try:
+            pk = kwargs.get('pk')
+            if not pk:
+                self.res.update(message = '路由异常，请携带id。', errorCode = 2)
+                self.finish(self.res.data)
+                return self.res.data
+            # print(validataed, type(validataed))
+            query = self.get_query_model().select(self.get_query_model().id).where(self.get_query_model().id == int(pk))
+            check_obj = await self.application.objects.execute(query)
+            if not check_obj:
+                self.res.update(message = '资源不存在。', errorCode = 2)
+                self.finish(self.res.data)
+                return self.res.data
+            if not json.loads(self.request_data):
+                self.finish(self.res.data)
+                return self.res.data
+            validataed = self.get_schema_class().load(json.loads(self.request_data))
+            [setattr(check_obj[0], key, val) for key,val in validataed.items()]
+            await self.application.objects.update(check_obj[0])
+            self.finish(self.res.data)
+            return self.res.data
+        except ValidationError as err:
+            self.res.update(message = str(err.messages), errorCode = 2)
+            self.finish(self.res.data)
+            return self.res.data
+        except Exception as e:
+            logger.error('出现异常：%s' % str(e))
+            self.res.update(message = "出现无法预料的异常：{}".format(str(e)), errorCode = 1)
+            self.finish(self.res.data)
+            return self.res.data
 
 
 class PutHandler(object):
