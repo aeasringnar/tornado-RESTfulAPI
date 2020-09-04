@@ -47,6 +47,18 @@ def authenticated_async(is_super=False):
     return decorator
 
 
+def allowall_async():
+    ''''
+    允许所有请求装饰器
+    '''
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(self, *args, **kwargs):
+            await func(self, *args, **kwargs)
+        return wrapper
+    return decorator
+
+
 def authvalidated_async(is_super=False):
     '''
     动态权限装饰器：根据用户的权限auth来判断对应的路由是否有权限：查看、新增、修改、删除

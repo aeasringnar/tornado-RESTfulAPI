@@ -1,4 +1,4 @@
-from .decorators import authvalidated_async, authenticated_async, validated_input_type
+from .decorators import authvalidated_async, allowall_async, authenticated_async, validated_input_type
 from .caches import cache_data
 from base.handler import BaseHandler
 from base.response import RestResponseMsg
