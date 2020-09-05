@@ -190,5 +190,11 @@ class PatchHandler(MixinHandler):
 
 
 class PutHandler(object):
-    def put(self, *args, **kwargs):
-        print('发起修改操作')
+    async def put(self, *args, **kwargs):
+        self.res = RestResponseMsg()
+        if hasattr(self, 'patch'):
+            self.patch(self, *args, **kwargs)
+        else:
+            self.res.update(message = "不支持的方法。", errorCode = 2)
+            self.finish(self.res.data)
+            return self.res.data
