@@ -563,6 +563,9 @@ from .schemas import CrudUseAddUserSchema, CrudUseReturnUserSchema
 
 class CRUDhandleTest(ListHandler, CreateHandler, DeleteHandler, PatchHandler):
     query_model = User
+    search_fields = ('username', 'nickname')
+    filter_fields = ('group_id', 'is_freeze', 'gander')
+    order_by_fields = ('create_time', 'update_time', 'id')
     # schema_class = CrudUseReturnUserSchema
 
     @property
