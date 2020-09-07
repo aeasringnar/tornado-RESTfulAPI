@@ -37,12 +37,6 @@ sync_db = peewee.MySQLDatabase(**DATABASES)
 async_db = peewee_async.MySQLDatabase(**DATABASES)
 
 
-# 文件上传配置
-FILE_CHECK = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'zip', 'rar', 'xls', 'xlsx', 'doc', 'docx', 'pptx', 'ppt', 'txt', 'pdf', 'py']
-FILE_SIZE = 1024 * 1024 * 64
-SERVER_NAME = settings['site_url']
-
-
 # 微信开发配置
 WECHAT_MCHID = '微信支付平台商户号'
 WECHAT_KEY = '微信支付平台秘钥'
@@ -87,3 +81,17 @@ REDIS = {
 }
 async def redis_pool(loop):
     return await aioredis.create_redis_pool('redis://localhost', minsize=1, maxsize=10000, encoding='utf8', loop=loop)
+
+
+# 文件上传配置
+FILE_CHECK = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'zip', 'rar', 'xls', 'xlsx', 'doc', 'docx', 'pptx', 'ppt', 'txt', 'pdf', 'py']
+FILE_SIZE = 1024 * 1024 * 64
+SERVER_NAME = settings['site_url']
+
+
+# 阿里云oss配置
+AliOSS_ACCESS_KEY_ID = "LTAI6hxpAQNHm0hE"
+AliOSS_ACCESS_KEY_SECRET = "Iw7jlRBsutGR2PUgg0vnydRzXETCOX"
+AliOSS_END_POINT = "oss-cn-hangzhou.aliyuncs.com"
+AliOSS_BUCKET_NAME = "base-api"
+UPLOAD_FILE_LOCATION = 'local'
