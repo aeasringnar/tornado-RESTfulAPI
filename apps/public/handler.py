@@ -15,12 +15,14 @@ from utils.utils import create_code
 from utils.decorators import authenticated_async, authvalidated_async, validated_input_type
 from utils.logger import logger
 from marshmallow import ValidationError
-from base.settings import async_db, sync_db, FILE_CHECK, FILE_SIZE, SERVER_NAME
+from base.settings import async_db, sync_db, FILE_CHECK, FILE_SIZE, SERVER_NAME, UPLOAD_FILE_LOCATION, AliOSS_ACCESS_KEY_ID, AliOSS_ACCESS_KEY_SECRET, AliOSS_END_POINT, AliOSS_BUCKET_NAME
 from .schemas import *
 from .models import *
 from celery_app.tasks import *
 from celery.result import AsyncResult
 import asyncio
+import oss2
+from urllib.parse import unquote
 
 
 class TestHandler(BaseHandler):
@@ -69,18 +71,32 @@ class UploadFileHandler(BaseHandler):
                 if file_size > FILE_SIZE:
                     res.update(messge = file_name + '文件超过64mb，无法上传。', errorCode = 2)
                 save_file_name = new_file_name + '.' + check_name
-                upfile_base_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'static/files/')
-                now_file_path = os.path.join(upfile_base_dir, str(datetime.now().date()))
-                is_have = os.path.exists(now_file_path)
-                if is_have:
-                    save_path = os.path.join(now_file_path,save_file_name)
+                if UPLOAD_FILE_LOCATION == 'local':
+                    upfile_base_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'static/files/')
+                    now_file_path = os.path.join(upfile_base_dir, str(datetime.now().date()))
+                    is_have = os.path.exists(now_file_path)
+                    if is_have:
+                        save_path = os.path.join(now_file_path,save_file_name)
+                    else:
+                        os.makedirs(now_file_path)
+                        save_path = os.path.join(now_file_path, save_file_name)
+                    with open(save_path, 'wb') as u_file:
+                        u_file.write(file_content)
+                    host_file_url = SERVER_NAME + '/files/' + save_file_name
+                    upload_host_url_list.append(host_file_url)
                 else:
-                    os.makedirs(now_file_path)
-                    save_path = os.path.join(now_file_path, save_file_name)
-                with open(save_path, 'wb') as u_file:
-                    u_file.write(file_content)
-                host_file_url = SERVER_NAME + '/files/' + save_file_name
-                upload_host_url_list.append(host_file_url)
+                    # 直接上传到oss
+                    auth = oss2.Auth(AliOSS_ACCESS_KEY_ID, AliOSS_ACCESS_KEY_SECRET)
+                    bucket = oss2.Bucket(auth, AliOSS_END_POINT, AliOSS_BUCKET_NAME)
+                    result = bucket.put_object(save_file_name, file_content)
+                    if result.status != 200:
+                        print(result)
+                        print((dir(result)))
+                        res.update(message = "上传出现异常", errorCode = 1)
+                        self.finish(res.data)
+                        return res.data
+                    url = bucket.sign_url('GET', file_name, 60)
+                    upload_host_url_list.append(unquote(url.split('?')[0]))
             res.update(data = upload_host_url_list if upload_host_url_list else {})
             self.finish(res.data)
             return res.data
