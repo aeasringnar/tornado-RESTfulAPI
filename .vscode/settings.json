@@ -1,3 +1,2 @@
-{
-    "python.pythonPath": "/home/aea/anaconda3/envs/tornado/bin/python" // 替换为你的虚拟环境路径
+{ // 替换为你的虚拟环境路径
 }
