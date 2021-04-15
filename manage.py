@@ -24,7 +24,9 @@ sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 
 
 if __name__ == '__main__':
-    signal.signal(signal.SIGINT,signal_handler)
+    signal.signal(signal.SIGINT, signal_handler)
+    if sys.platform == 'win32':
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     try:
         if len(sys.argv) < 2:
             print("""缺少选项！
@@ -71,5 +73,4 @@ runserver 运行服务，需要指定地址(选填)&端口。示例：runserver 
 migrate 生成表(迁移表)
 update 修改表迁移""")
     except Exception as e:
-        logging.error('发生异常：%s' % str(e))
-        
+        logging.error('发生异常：%s —— %s' % (e.__class__, str(e)))
