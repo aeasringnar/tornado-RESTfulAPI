@@ -13,7 +13,7 @@ from base.handler import BaseHandler
 from base.response import RestResponseMsg
 from utils.utils import create_code
 from utils.decorators import authenticated_async, authvalidated_async, validated_input_type
-from utils.logger import logger
+import logging
 from marshmallow import ValidationError
 from base.settings import async_db, sync_db, FILE_CHECK, FILE_SIZE, SERVER_NAME, UPLOAD_FILE_LOCATION, AliOSS_ACCESS_KEY_ID, AliOSS_ACCESS_KEY_SECRET, AliOSS_END_POINT, AliOSS_BUCKET_NAME
 from .schemas import *
@@ -37,7 +37,7 @@ class TestHandler(BaseHandler):
             self.finish(res.data)
             return res.data
         except Exception as e:
-            logger.error('出现异常：%s' % str(e))
+            logging.error('出现异常：%s' % str(e))
             res.update(message = "出现无法预料的异常：{}".format(str(e)), errorCode = 1)
             self.finish(res.data)
             return res.data
@@ -105,7 +105,7 @@ class UploadFileHandler(BaseHandler):
             self.finish(res.data)
             return res.data
         except Exception as e:
-            logger.error('出现异常：%s' % str(e))
+            logging.error('出现异常：%s' % str(e))
             res.update(message = "出现无法预料的异常：{}".format(str(e)), errorCode = 1)
             self.finish(res.data)
             return res.data
@@ -142,7 +142,7 @@ class GetMobielCodeHandler(BaseHandler):
             self.finish(res.data)
             return res.data
         except Exception as e:
-            logger.error('出现异常：%s' % str(e))
+            logging.error('出现异常：%s' % str(e))
             res.update(message = "出现无法预料的异常：{}".format(str(e)), errorCode = 1)
             self.finish(res.data)
             return res.data
@@ -161,7 +161,7 @@ class RunTaskHandler(BaseHandler):
             self.finish(res.data)
             return res.data
         except Exception as e:
-            logger.error('出现异常：%s' % str(e))
+            logging.error('出现异常：%s' % str(e))
             res.update(message = "出现无法预料的异常：{}".format(str(e)), errorCode = 1)
             self.finish(res.data)
             return res.data
@@ -187,7 +187,7 @@ class GetTaskResultHandler(BaseHandler):
             self.finish(res.data)
             return res.data
         except Exception as e:
-            logger.error('出现异常：%s' % str(e))
+            logging.error('出现异常：%s' % str(e))
             res.update(message = "出现无法预料的异常：{}".format(str(e)), errorCode = 1)
             self.finish(res.data)
             return res.data

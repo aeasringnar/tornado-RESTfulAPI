@@ -1,7 +1,7 @@
 from functools import wraps
 from .cache_lock import CacheRedisLock
 from base.settings import settings
-from .logger import logger
+import logging
 import asyncio
 import json
 
@@ -24,17 +24,17 @@ def cache_data(need_auth = False, cache_time = 60*5):
                 print(cache_key)
                 data = await self.application.redis.get(cache_key, encoding='utf-8')
                 if data:
-                    logger.debug('命中缓存')
+                    logging.debug('命中缓存')
                     self.finish(json.loads(data))
                 else:
-                    logger.debug('缓存不存在')
+                    logging.debug('缓存不存在')
                     res = await func(self, *args, **kwargs)
                     await self.application.redis.set(cache_key, json.dumps(res), expire = cache_time)
                 # print(res)
                 # print(type(res))
             except Exception as e:
                 self.set_status(200)
-                logger.error('出现异常：{}'.format(str(e)))
+                logging.error('出现异常：{}'.format(str(e)))
                 res = await func(self, *args, **kwargs)
                 return res
         return wrapper

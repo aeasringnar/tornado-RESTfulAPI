@@ -1,7 +1,7 @@
 from functools import wraps
 import jwt
 from apps.users.models import User, Auth, AuthPermission
-from .logger import logger
+import logging
 
 
 def authenticated_async(is_super=False):
@@ -41,7 +41,7 @@ def authenticated_async(is_super=False):
                 return self.finish({"message": "Token不合法", "errorCode": 1, "data": {}})
             except Exception as e:
                 self.set_status(401)
-                logger.error('出现异常：{}'.format(str(e)))
+                logging.error('出现异常：{}'.format(str(e)))
                 return self.finish({"message": "Token异常", "errorCode": 2, "data": {}})
         return wrapper
     return decorator
@@ -101,7 +101,7 @@ def validated_input_type(input_type = 'application/json'):
                 await func(self, *args, **kwargs)
             except Exception as e:
                 self.set_status(200)
-                logger.error('出现异常：{}'.format(str(e)))
+                logging.error('出现异常：{}'.format(str(e)))
                 return self.finish({"message": str(e), "errorCode": 2, "data": {}})
         return wrapper
     return decorator

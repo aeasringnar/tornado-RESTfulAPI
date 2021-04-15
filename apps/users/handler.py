@@ -17,7 +17,7 @@ from .schemas import AuthSerializer, AuthPermissionSerializer, NewUserSerializer
     ChangeUserSchema
 from marshmallow import ValidationError
 from base.settings import async_db, sync_db
-from utils.logger import logger
+import logging
 import copy
 from tornado.websocket import WebSocketHandler
 from utils.caches import cache_data
@@ -72,7 +72,7 @@ class MobileLoginHandler(BaseHandler):
         except ValidationError as err:
             return self.finish({"message": str(err.messages), "errorCode": 2, "data": {}})
         except Exception as e:
-            logger.error('出现异常：%s' % str(e))
+            logging.error('出现异常：%s' % str(e))
             return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
 
 
@@ -132,7 +132,7 @@ class AdminLoginHandler(BaseHandler):
         except ValidationError as err:
             return self.finish({"message": str(err.messages), "errorCode": 2, "data": {}})
         except Exception as e:
-            logger.error('出现异常：%s' % str(e))
+            logging.error('出现异常：%s' % str(e))
             return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
 
 
@@ -163,7 +163,7 @@ class UserInfoHandler(BaseHandler):
             res_format['data'] = json.loads(ReturnUserSchema().dumps(user))
             return self.finish(res_format)
         except Exception as e:
-            logger.error('出现异常：%s' % str(e))
+            logging.error('出现异常：%s' % str(e))
             return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
 
     @authenticated_async()
@@ -194,7 +194,7 @@ class UserInfoHandler(BaseHandler):
         except ValidationError as err:
             return self.finish({"message": str(err.messages), "errorCode": 2, "data": {}})
         except Exception as e:
-            logger.error('出现异常：%s' % str(e))
+            logging.error('出现异常：%s' % str(e))
             return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
 
 
@@ -265,7 +265,7 @@ class AuthHandler(BaseHandler):
                 res_format['data'] = auth_dics
             return self.finish(res_format)
         except Exception as e:
-            logger.error('出现异常：%s' % str(e))
+            logging.error('出现异常：%s' % str(e))
             return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
 
     @authenticated_async()
@@ -312,7 +312,7 @@ class AuthHandler(BaseHandler):
         except ValidationError as err:
             return self.finish({"message": str(err.messages), "errorCode": 2, "data": {}})
         except Exception as e:
-            logger.error('出现异常：%s' % str(e))
+            logging.error('出现异常：%s' % str(e))
             return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
 
     @authenticated_async()
@@ -352,7 +352,7 @@ class AuthHandler(BaseHandler):
         except ValidationError as err:
             return self.finish({"message": str(err.messages), "errorCode": 2, "data": {}})
         except Exception as e:
-            logger.error('出现异常：%s' % str(e))
+            logging.error('出现异常：%s' % str(e))
             return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
 
     @authenticated_async()
@@ -376,7 +376,7 @@ class AuthHandler(BaseHandler):
             await self.application.objects.delete(check_obj[0])
             return self.finish(res_format)
         except Exception as e:
-            logger.error('出现异常：%s' % str(e))
+            logging.error('出现异常：%s' % str(e))
             return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
 
 
@@ -436,7 +436,7 @@ class AdminUserHandler(BaseHandler):
             self.finish(res_format)
             return res_format
         except Exception as e:
-            logger.error('出现异常：%s' % str(e))
+            logging.error('出现异常：%s' % str(e))
             return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
 
     @authenticated_async()
@@ -478,7 +478,7 @@ class AdminUserHandler(BaseHandler):
         except ValidationError as err:
             return self.finish({"message": str(err.messages), "errorCode": 2, "data": {}})
         except Exception as e:
-            logger.error('出现异常：%s' % str(e))
+            logging.error('出现异常：%s' % str(e))
             return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
 
     @authenticated_async()
@@ -510,7 +510,7 @@ class AdminUserHandler(BaseHandler):
         except ValidationError as err:
             return self.finish({"message": str(err.messages), "errorCode": 2, "data": {}})
         except Exception as e:
-            logger.error('出现异常：%s' % str(e))
+            logging.error('出现异常：%s' % str(e))
             return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
 
     @authenticated_async()
@@ -534,7 +534,7 @@ class AdminUserHandler(BaseHandler):
             await self.application.objects.delete(check_obj[0])
             return self.finish(res_format)
         except Exception as e:
-            logger.error('出现异常：%s' % str(e))
+            logging.error('出现异常：%s' % str(e))
             return self.finish({"message": "出现无法预料的异常：{}".format(str(e)), "errorCode": 1, "data": {}})
 
 

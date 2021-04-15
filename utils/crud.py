@@ -3,7 +3,7 @@ from .caches import cache_data
 from base.handler import BaseHandler
 from base.response import RestResponseMsg
 from base.pagination import Pagination
-from .logger import logger
+import logging
 import json
 from peewee import SQL
 from marshmallow import ValidationError
@@ -60,7 +60,7 @@ class ListHandler(MixinHandler):
             self.finish(self.res.data)
             return self.res.data
         except Exception as e:
-            logger.error('出现异常：%s' % str(e))
+            logging.error('出现异常：%s' % str(e))
             self.res.update(message = "出现无法预料的异常：{}".format(str(e)), errorCode = 1)
             self.finish(self.res.data)
             return self.res.data
@@ -115,7 +115,7 @@ class CreateHandler(MixinHandler):
             self.finish(self.res.data)
             return self.res.data
         except Exception as e:
-            logger.error('出现异常：%s' % str(e))
+            logging.error('出现异常：%s' % str(e))
             self.res.update(message = "出现无法预料的异常：{}".format(str(e)), errorCode = 1)
             self.finish(self.res.data)
             return self.res.data
@@ -144,7 +144,7 @@ class DeleteHandler(MixinHandler):
             self.finish(self.res.data)
             return self.res.data
         except Exception as e:
-            logger.error('出现异常：%s' % str(e))
+            logging.error('出现异常：%s' % str(e))
             self.res.update(message = "出现无法预料的异常：{}".format(str(e)), errorCode = 1)
             self.finish(self.res.data)
             return self.res.data
@@ -183,7 +183,7 @@ class PatchHandler(MixinHandler):
             self.finish(self.res.data)
             return self.res.data
         except Exception as e:
-            logger.error('出现异常：%s' % str(e))
+            logging.error('出现异常：%s' % str(e))
             self.res.update(message = "出现无法预料的异常：{}".format(str(e)), errorCode = 1)
             self.finish(self.res.data)
             return self.res.data

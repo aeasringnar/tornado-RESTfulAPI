@@ -1,5 +1,5 @@
 from tornado.web import RequestHandler
-from utils.logger import logger
+import logging
 import redis
 import time
 import traceback
@@ -9,13 +9,13 @@ class BaseHandler(RequestHandler):
     def __init__(self, application, request, **kwargs):
         super().__init__(application, request, **kwargs)
         self.redis_conn = redis.StrictRedis()
-        logger.info('************************************************* 下面是新的一条日志 ***************************************************')
-        logger.info(' '.join([request.version, request.remote_ip, request.method, request.uri]))
-        logger.info('请求IP：' + request.remote_ip)
+        logging.info('************************************************* 下面是新的一条日志 ***************************************************')
+        logging.info(' '.join([request.version, request.remote_ip, request.method, request.uri]))
+        logging.info('请求IP：' + request.remote_ip)
         if request.query:
-            logger.debug('params参数：' + request.query)
+            logging.debug('params参数：' + request.query)
         if  self.request.headers.get("Content-Type") and self.request.headers.get("Content-Type").split(';')[0] == 'application/json':
-            logger.debug('body参数：' + request.body.decode())
+            logging.debug('body参数：' + request.body.decode())
             
     def set_default_headers(self):
         self.set_header('Access-Control-Allow-Origin', '*')

@@ -7,7 +7,7 @@ from peewee_async import Manager
 from base.urls import urlpatterns
 from base.settings import settings, async_db, redis_pool
 from utils.db_manage import run_create, run_update
-from utils.logger import logger
+import logging
 import signal
 from multiprocessing import cpu_count
 import asyncio
@@ -53,7 +53,7 @@ update 修改表迁移""")
             loop = asyncio.get_event_loop()
             # app.redis = RedisPool(loop=loop).get_conn()
             app.redis = loop.run_until_complete(redis_pool(loop))
-            logger.info("""[%s]Wellcome...
+            logging.info("""[%s]Wellcome...
 Starting development server at http://%s:%s/       
 Quit the server with CTRL+C.""" % (('debug' if settings['debug'] else 'line'), host, port))
             server = HTTPServer(app)
@@ -71,5 +71,5 @@ runserver 运行服务，需要指定地址(选填)&端口。示例：runserver 
 migrate 生成表(迁移表)
 update 修改表迁移""")
     except Exception as e:
-        logger.error('发生异常：%s' % str(e))
+        logging.error('发生异常：%s' % str(e))
         
