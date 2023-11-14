@@ -8,7 +8,7 @@ celery==4.4.6
 redis==3.5.3
 pika==1.1.0
 PyJWT==1.7.1
-PyYAML==5.3.1
+PyYAML==5.4
 aiofiles==0.5.0
 Pillow==7.2.0
 swagger-py-codegen==0.4.0
